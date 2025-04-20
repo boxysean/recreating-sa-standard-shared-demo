@@ -1,0 +1,175 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Customer dimension table tracking all customer-related attributes
+    columns:
+      - name: customer_key
+        description: Unique identifier for customers
+        tests:
+          - unique
+          - not_null
+      
+      - name: region
+        description: Geographic region of the customer
+        tests:
+          - accepted_values:
+              values: ['AFRICA', 'MIDDLE EAST', 'ASIA', 'AMERICA']
+      
+      - name: name
+        description: Customer name
+        tests:
+          - not_null
+      
+      - name: address
+        description: Customer address
+        tests:
+          - not_null
+      
+      - name: nation
+        description: Nation name
+        tests:
+          - not_null
+      
+      - name: phone_number
+        description: Customer phone number
+        tests:
+          - not_null
+      
+      - name: account_balance
+        description: Current account balance
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: -1000000  # Adjust these values based on business rules
+              max_value: 1000000
+      
+      - name: market_segment
+        description: Market segment the customer belongs to
+        tests:
+          - not_null
+      
+      - name: lifetime_value
+        description: Total lifetime value of the customer based on order history
+      
+      - name: is_high_value
+        description: Flag indicating if customer is in high value segment
+        tests:
+          - accepted_values:
+              values: ['Y', 'N']
+      
+      - name: is_mid_value
+        description: Flag indicating if customer is in mid value segment
+        tests:
+          - accepted_values:
+              values: ['Y', 'N']
+      
+      - name: is_low_value
+        description: Flag indicating if customer is in low value segment
+        tests:
+          - accepted_values:
+              values: ['Y', 'N']
+
+  - name: fct_orders
+    description: Order header fact table providing order-level aggregations and tracking
+    columns:
+      - name: order_key
+        description: Unique identifier for orders
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_key
+        description: Foreign key to dim_customers
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_key
+
+      - name: order_date
+        description: Date the order was made
+        tests:
+          - not_null
+
+      - name: order_time
+        description: Time the order was made
+        tests:
+          - not_null
+
+      - name: status_code
+        description: Status code of the order
+        tests:
+          - not_null
+
+      - name: priority_code
+        description: Priority code of the order
+        tests:
+          - not_null
+
+      - name: clerk_name
+        description: Name of the clerk who processed the order
+        tests:
+          - not_null
+
+      - name: ship_priority
+        description: Shipping priority of the order
+        tests:
+          - not_null
+
+      - name: order_item_count
+        description: Number of items in the order
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: return_count
+        description: Number of items returned in the order
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: ref('order_item_count')
+
+      - name: quantity
+        description: Total quantity of items in the order
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: gross_item_sales_amount
+        description: Total gross sales amount before discounts and taxes
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: discounted_item_sales_amount
+        description: Sales amount after discounts but before taxes
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: net_item_sales_amount
+        description: Final sales amount after discounts and taxes
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: item_discount_amount
+        description: Total discount amount applied to the order
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: item_tax_amount
+        description: Total tax amount applied to the order
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0 

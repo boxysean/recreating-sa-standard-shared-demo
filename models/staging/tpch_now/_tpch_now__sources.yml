@@ -1,0 +1,84 @@
+version: 2
+
+sources:
+  - name: tpch_now
+    database: raw
+    schema: tpch_now
+    tables:
+      - name: orders
+        description: Main order tracking table
+        columns:
+          - name: o_orderkey
+            description: SF*1,500,000 are sparsely populated
+            tests:
+              - unique
+              - not_null
+          - name: o_custkey
+            description: Foreign Key to C_CUSTKEY
+            tests:
+              - relationships:
+                  to: source('tpch_sf001', 'customer')
+                  field: c_custkey
+          - name: o_orderstatus
+            description: Status code of the order
+          - name: o_totalprice
+            description: Raw price
+          - name: o_orderdate
+            description: Date the order was made
+          - name: o_ordertime
+            description: Time the order was made
+          - name: o_orderpriority
+            description: Code associated with the order
+          - name: o_clerk
+            description: ID of the clerk
+          - name: o_shippriority
+            description: Numeric representation of shipping priority (0 default)
+          - name: o_comment
+            description: General comment field
+
+      - name: lineitem
+        description: Main lineitem table
+        columns:
+          - name: l_orderkey
+            description: Foreign Key to O_ORDERKEY
+            tests:
+              - relationships:
+                  to: source('tpch_now', 'orders')
+                  field: o_orderkey
+          - name: l_partkey
+            description: Foreign key to P_PARTKEY
+          - name: l_suppkey
+            description: Foreign key to S_SUPPKEY
+          - name: l_linenumber
+            description: Sequence of order items within the order
+          - name: l_quantity
+            description: Total units
+          - name: l_extendedprice
+            description: Line item price
+          - name: l_discount
+            description: Percentage of the discount
+          - name: l_tax
+            description: Tax rate of the order item
+          - name: l_returnflag
+            description: Letter determining return status
+            tests:
+              - accepted_values:
+                  values: ['R', 'A']
+                  severity: warn
+          - name: l_linestatus
+            description: Status code of the order item
+            tests:
+              - accepted_values:
+                  values: ['P', 'F', 'O']
+          - name: l_shipdate
+            description: Shipment date
+          - name: l_commitdate
+            description: Commitment date
+          - name: l_receiptdate
+            description: Receipt date
+          - name: l_shipinstruct
+            description: Additional shipment instructions
+          - name: l_shipmode
+            description: Method of shipping
+          - name: l_comment
+            description: General comment field 
